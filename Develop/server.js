@@ -28,23 +28,23 @@ const Note = function(title, text, id){
 const savedNotes = [];
 
 //Routes
-app.get("/", function (req, res) {
+app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public/home.html"))
 
 });
 
-app.get("/notes", function (req, res) {
+app.get("/notes", (req, res) => {
     res.sendFile(path.join(__dirname, "public/notes.html"))
 
 });
 
-app.post("/api/notes", function( req, res ) {
+app.post("/api/notes", ( req, res ) => {
     // Create a new note and push it into the saved notes array
     const newNote = req.body;
     savedNotes.push(newNote);
 
     // Each new note will be assigned a unique id based on its position in the saved notes array
-    newNote.id = savedNotes.length+1;
+    newNote.id = savedNotes.length;
 
     // Append each new note to db.json file
     fs.appendFile("db.json", `${JSON.stringify(newNote)}\n`, err => {
@@ -53,14 +53,22 @@ app.post("/api/notes", function( req, res ) {
     return res.json(newNote);
 });
 
-app.get("/api/notes", function ( req, res ) {
+app.get("/api/notes", ( req, res ) => {
     // Read db.json file and return saved notes
-    fs.readFile("db.json", "utf-8", (error, data) => 
-    error ? console.error(error) : console.log(data)) 
+    fs.readFile("db.json", "utf-8", (error, data) => {
+       if(error) throw error
+       console.log(data);
+       return res.json(JSON.parse(data)); 
+    })   
 });
 
-app.delete("/api/notes/:id", function( query ) {
-    // Delete the db.json file
-    fs.unlink("db.json", (err) =>
-    err ? console.error(err) : console.log("File deleted!"))
-})
+// app.delete("/api/notes/:id", function( query ) {
+//     // Delete the db.json file
+//     fs.unlink("db.json", (err) =>
+//     err ? console.error(err) : console.log("File deleted!"));
+
+//     // Remove the selected note from the saved notes array
+//     for(i=0; i>savedNotes.length; i++){
+//         if()
+//     }
+// })
