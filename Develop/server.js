@@ -1,5 +1,4 @@
 const express = require("express");
-const { networkInterfaces } = require("os");
 const path = require("path");
 const fs = require("fs");
 
@@ -15,17 +14,8 @@ app.use(express.static("public"));
 
 // Listen on port 3000
 app.listen(PORT, function () {
-    console.log("App listening on PORT " + PORT);
+    console.log(`App listening on port ${PORT}!`);
 });
-
-// New note object
-const Note = function(title, text, id){
-    this.title = title;
-    this.text = text;
-    this.id = id;
-};
-
-const savedNotes = [];
 
 //Routes
 app.get("/", (req, res) => {
@@ -38,28 +28,34 @@ app.get("/notes", (req, res) => {
 
 });
 
-app.post("/api/notes", ( req, res ) => {
+app.post("/api/notes", (req, res) => {
     // Create a new note and push it into the saved notes array
     const newNote = req.body;
-    savedNotes.push(newNote);
 
-    // Each new note will be assigned a unique id based on its position in the saved notes array
-    newNote.id = savedNotes.length;
+    // Read the db.json file and append its contents to the savedNotes array
+    fs.readFile("db.json", "utf-8", (error, data) => {
+        if (error) throw error
+        let allNotes = JSON.parse(data);
+        allNotes.push(newNote);
+        newNote.id = allNotes.length;
 
-    // Append each new note to db.json file
-    fs.appendFile("db.json", `${JSON.stringify(newNote)}\n`, err => {
-        err ? console.error(err) : console.log("Success!")
+        // Write db.json file with allNotes array
+        fs.writeFile("db.json", `${JSON.stringify(allNotes)}`, (error, data) => {
+            if (error) throw error
+            console.log("Success!");
+            res.json(req.body);
+        });
     });
-    return res.json(newNote);
+
+
 });
 
-app.get("/api/notes", ( req, res ) => {
+app.get("/api/notes", (req, res) => {
     // Read db.json file and return saved notes
     fs.readFile("db.json", "utf-8", (error, data) => {
-       if(error) throw error
-       console.log(data);
-       return res.json(JSON.parse(data)); 
-    })   
+        if (error) throw error
+        res.json(JSON.parse(data));
+    })
 });
 
 // app.delete("/api/notes/:id", function( query ) {
