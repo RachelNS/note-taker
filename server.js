@@ -29,7 +29,7 @@ app.get("/notes", (req, res) => {
 });
 
 app.post("/api/notes", (req, res) => {
-    // Create a new note and push it into the saved notes array
+    // Create a new note 
     const newNote = req.body;
 
     // Read the db.json file and append its contents to the savedNotes array
@@ -58,13 +58,34 @@ app.get("/api/notes", (req, res) => {
     })
 });
 
-// app.delete("/api/notes/:id", function( query ) {
-//     // Delete the db.json file
-//     fs.unlink("db.json", (err) =>
-//     err ? console.error(err) : console.log("File deleted!"));
+app.delete("/api/notes/:id", function (req, res) {
+    console.log(`delete request at id ${req.params.id}`);
 
-//     // Remove the selected note from the saved notes array
-//     for(i=0; i>savedNotes.length; i++){
-//         if()
-//     }
-// })
+    fs.readFile("db.json", "utf-8", (error, data) => {
+        if(error) throw error
+        let savedNotes = JSON.parse(data)
+
+        // console.log(savedNotes);
+        
+        let newNotesArr = savedNotes.filter((id) => {
+            return id !== req.params.id
+        });
+        console.log(newNotesArr);
+
+        // for(i=0; i>savedNotes.length; i++) {
+        // if(savedNotes[i].id === req.params.id) {
+        //     savedNotes.splice(i, 1);
+        // } else{
+        //     console.log("Nothing to delete fam")
+        // }
+        // };
+
+        fs.writeFile("db.json", `${JSON.stringify(newNotesArr)}`, (error, data) => {
+            if(error) throw error
+            console.log("Success!");
+        })
+
+
+    })
+
+})
