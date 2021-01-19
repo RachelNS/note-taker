@@ -61,31 +61,21 @@ app.get("/api/notes", (req, res) => {
 app.delete("/api/notes/:id", function (req, res) {
     console.log(`delete request at id ${req.params.id}`);
 
+    // Read db.json file and parse 
     fs.readFile("db.json", "utf-8", (error, data) => {
         if(error) throw error
         let savedNotes = JSON.parse(data)
-
-        // console.log(savedNotes);
-        
-        let newNotesArr = savedNotes.filter((id) => {
-            return id !== req.params.id
+        // Filter saved notes and return all indexes that do not match request id
+        let newNotesArr = savedNotes.filter(({id}) => {
+            return id !== parseInt(req.params.id)
         });
-        console.log(newNotesArr);
-
-        // for(i=0; i>savedNotes.length; i++) {
-        // if(savedNotes[i].id === req.params.id) {
-        //     savedNotes.splice(i, 1);
-        // } else{
-        //     console.log("Nothing to delete fam")
-        // }
-        // };
-
+        // Re-write db.json file without deleted note
         fs.writeFile("db.json", `${JSON.stringify(newNotesArr)}`, (error, data) => {
             if(error) throw error
             console.log("Success!");
         })
 
-
+        res.json(newNotesArr);
     })
 
 })
